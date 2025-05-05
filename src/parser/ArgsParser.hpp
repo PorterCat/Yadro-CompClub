@@ -21,22 +21,22 @@ public:
 
     struct EventArgs
     {
-        Time time = Time::Min;
+        Time time = Time(0, 0);
         Events::EventId id = 0;
         std::string clientName = std::string();
-        std::optional<uint8_t> tableNumber = std::nullopt;
+        std::optional<uint64_t> tableNumber = std::nullopt;
     };
     
     struct Args
     {
-        uint8_t tableCount = 0;
-        Time startTime = Time::Min;
-        Time endTime = Time::Min;
-        uint8_t pricePerHour = 0;
+        uint64_t tableCount = 0;
+        Time startTime = Time(0, 0);
+        Time endTime = Time(0, 0);
+        uint64_t pricePerHour = 0;
         std::vector<EventArgs> events = {};
 
         Args() {}
-        Args(uint8_t tables) : tableCount(tables) {}
+        Args(uint64_t tables) : tableCount(tables) {}
     };
 
 private:
@@ -48,7 +48,7 @@ private:
 
     // Parsing Helpers
     static void parseCoreParameters(std::span<const std::string> lines, Args& args);
-    static EventArgs parseEvent(const std::string& line, uint8_t tableCount);
+    static EventArgs parseEvent(const std::string& line, uint64_t tableCount);
     static std::pair<Time, Time> parseWorkingTime(const std::string& line);
 };
 

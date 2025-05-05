@@ -5,14 +5,18 @@
 #include <iomanip>
 #include <string>
 
+
 struct Time
 {
     uint8_t hours, minutes;
-    
+
     Time(uint8_t h, uint8_t m) : hours(h), minutes(m)
+    {}
+
+    Time(uint16_t m)
     {
-        if (hours > 23 || minutes > 59)
-            throw std::out_of_range("Time value out of range");
+        hours = static_cast<uint8_t>(m / 60);
+        minutes = m % 60;
     }
     
     Time(const std::string& s)
@@ -26,7 +30,7 @@ struct Time
             int h = std::stoi(hour_str);
             int m = std::stoi(min_str);
 
-            if (h < 0 || h > 23 || m < 0 || m > 59)
+            if (h < 0 ||  m < 0)
                 throw std::out_of_range("Time value out of range");
 
             hours = static_cast<uint8_t>(h);
@@ -40,9 +44,14 @@ struct Time
         }
     }
 
-    int toMinutes() const
+    uint16_t toMinutes() const
     {
         return hours * 60 + minutes;
+    }
+
+    double toHours() const
+    {
+        return hours + (static_cast<double>(minutes) / 60);
     }
 
     std::string toString() const
@@ -58,8 +67,38 @@ struct Time
         return toMinutes() < other.toMinutes();
     }
 
-    static const Time Min;
-    static const Time Max;
+    bool operator> (const Time& other) const
+    {
+        return toMinutes() > other.toMinutes();
+    }
+
+    bool operator>= (const Time& other) const
+    {
+        return toMinutes() >= other.toMinutes();
+    }
+
+    bool operator<= (const Time& other) const
+    {
+        return toMinutes() <= other.toMinutes();
+    }
+
+    Time operator-(const Time& other) const
+    {
+        int diff = toMinutes() - other.toMinutes();
+        diff %= 1440;
+        if (diff < 0)
+            diff += 1440;
+        return {static_cast<uint16_t>(diff)};
+    }
+
+    Time& operator+=(const Time& var)
+    {
+        *this += var.toMinutes();
+        return *this;
+    }
+
+    static const Time MidNight;
+    static const Time Zero;
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const Time& time)

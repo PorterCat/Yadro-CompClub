@@ -1,6 +1,9 @@
-#pragma once
+#ifndef EVENTTYPE_HPP
+#define EVENTTYPE_HPP
 #include <string>
 #include <unordered_map>
+
+#include "Time.hpp"
 
 namespace Events
 {
@@ -13,7 +16,7 @@ enum class EventType
     ClientWaiting,       // ID 3
     ClientLeft,          // ID 4
 
-    ClientForcedOut,     // ID 11
+    OutputClientLeft,    // ID 11
     ClientSatFromQueue,  // ID 12
     ErrorOccurred,       // ID 13
 
@@ -28,7 +31,7 @@ inline EventType toType(EventId id)
         {2,  EventType::ClientSat},
         {3,  EventType::ClientWaiting},
         {4,  EventType::ClientLeft},
-        {11, EventType::ClientForcedOut},
+        {11, EventType::OutputClientLeft},
         {12, EventType::ClientSatFromQueue},
         {13, EventType::ErrorOccurred}
     };
@@ -43,7 +46,7 @@ inline EventId toId(EventType type)
         {EventType::ClientSat,          2},
         {EventType::ClientWaiting,      3},
         {EventType::ClientLeft,         4},
-        {EventType::ClientForcedOut,   11},
+        {EventType::OutputClientLeft,   11},
         {EventType::ClientSatFromQueue,12},
         {EventType::ErrorOccurred,     13}
     };
@@ -57,7 +60,7 @@ inline std::string getName(EventType type)
         {EventType::ClientSat,          "ClientSat"},
         {EventType::ClientWaiting,      "ClientWaiting"},
         {EventType::ClientLeft,         "ClientLeft"},
-        {EventType::ClientForcedOut,    "ClientForcedOut"},
+        {EventType::OutputClientLeft,    "ClientForcedOut"},
         {EventType::ClientSatFromQueue, "ClientSatFromQueue"},
         {EventType::ErrorOccurred,      "ErrorOccurred"},
         {EventType::Unknown,            "Unknown"}
@@ -65,3 +68,5 @@ inline std::string getName(EventType type)
     return names.at(type);
 }
 }
+
+#endif // EVENTTYPE_HPP

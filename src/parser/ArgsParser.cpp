@@ -70,7 +70,7 @@ void ArgsParser::parseCoreParameters(std::span<const std::string> lines, Args& a
     if(tables < 0)
         throw std::out_of_range("Invalid table number");
 
-    args.tableCount = static_cast<uint8_t>(tables);
+    args.tableCount = static_cast<uint64_t>(tables);
     
     auto timeStartEnd = parseWorkingTime(lines[1]);
     args.startTime = timeStartEnd.first;
@@ -79,7 +79,7 @@ void ArgsParser::parseCoreParameters(std::span<const std::string> lines, Args& a
     args.pricePerHour = static_cast<uint8_t>(std::stoi(lines[2]));
 }
 
-ArgsParser::EventArgs ArgsParser::parseEvent(const std::string& line, uint8_t tableCount)
+ArgsParser::EventArgs ArgsParser::parseEvent(const std::string& line, uint64_t tableCount)
 {
     std::istringstream iss(line);
     std::string timeStr, idStr;

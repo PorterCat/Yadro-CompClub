@@ -21,4 +21,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${SRC_DIR}/shared 
     ${SRC_DIR}/events
     ${SRC_DIR}/parser
+    ${SRC_DIR}/club
 )
