@@ -37,6 +37,8 @@ struct Table
             static_cast<uint64_t>(std::ceil(durationHours)) * price : 0;
         
         occupiedDuration += duration;
+
+        currentSession.reset();
     }
 };
 
@@ -74,16 +76,17 @@ public:
     void sitForTable(uint64_t tableId, const std::string& client, const Time& time);
     void releaseTable(uint64_t tableId, const Time& time);
     void sitSomebodyFromQueue(uint64_t tableId, const Time& time);
-    void moveUser(uint64_t from, uint64_t to, const Time& time);
+    void moveUser(uint64_t from, uint64_t to, const std::string&, const Time& time);
     
     bool isEverythingOccupied() const
     {
         return clientToTable.size() == tables.size() - 1;
     }
     
+    
     bool isClientInside(const std::string& client) const
     {
-        return clientToTable.contains(client) || isInQueue(client);
+        return isClientAtTable(client) || isClientInQueue(client);
     }
 
     bool isTableOccupied(uint64_t tableId) const
@@ -108,13 +111,12 @@ public:
         return clientToTable.at(clientName);
     }
 
-    bool isClientAtTable(const std::string& clientName)
+    bool isClientAtTable(const std::string& clientName) const
     {
         return clientToTable.contains(clientName);
     }
 
-private:
-    bool isInQueue(const std::string& clientName) const
+    bool isClientInQueue(const std::string& clientName) const
     {
         return clientToIterator.contains(clientName);
     }

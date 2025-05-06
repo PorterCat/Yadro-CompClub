@@ -29,11 +29,10 @@ void ClubState::sitSomebodyFromQueue(uint64_t tableId, const Time& time)
     }
 }
 
-void ClubState::moveUser(uint64_t from, uint64_t to, const Time& time)
+void ClubState::moveUser(uint64_t from, uint64_t to, const std::string& clientName, const Time& time)
 {
     tables[from].ImReadyToPay(time, pricePerHour);
-    tables[to].currentSession = std::move(tables[from].currentSession);
-    tables[to].currentSession->startTime = Time::Zero;
+    tables[to].currentSession = Session{clientName, time};
 }
 
 void ClubState::kickOutClients()

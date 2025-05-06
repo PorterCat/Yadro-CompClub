@@ -83,6 +83,11 @@ struct Time
         return toMinutes() <= other.toMinutes();
     }
 
+    bool operator== (const Time& other) const
+    {
+        return toMinutes() == other.toMinutes();
+    }
+
     Time operator-(const Time& other) const
     {
         int diff = toMinutes() - other.toMinutes();

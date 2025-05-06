@@ -27,4 +27,4 @@ if errorlevel 1 (
 
 cd ..
 
-echo For start: build/%PROJECT_NAME%.exe test_file.txt
+echo For start: build/compclub.exe test_file.txt

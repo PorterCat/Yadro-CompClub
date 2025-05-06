@@ -17,13 +17,22 @@ public:
             return;
         }
 
-        if(!state.isClientInside(event.clientName))
+        if(!state.isClientInQueue(event.clientName) && !state.isClientAtTable(event.clientName))
         {
             printError(event, "ClientUnknown");
+            return;
+        }
+        
+        if(state.isClientInQueue(event.clientName))
+        {
+            state.removeFromQueue(event.clientName);
+            state.sitForTable(event.tableNumber.value(), event.clientName, event.time);
         }
 
-        state.removeFromQueue(event.clientName);
-        state.sitForTable(event.tableNumber.value(), event.clientName, event.time);
+        if(state.isClientAtTable(event.clientName))
+        {
+            state.moveUser(state.getClientTable(event.clientName).value(), event.tableNumber.value(), event.clientName, event.time);
+        }
     }
 };
 

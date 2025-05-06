@@ -78,6 +78,10 @@ void DayParser::parseCoreParameters(std::span<const std::string> lines, DayArgs&
     args.startTime = timeStartEnd.first;
     args.endTime = timeStartEnd.second;
 
+    if(args.startTime == args.endTime || (args.startTime == Time::Zero && args.endTime == Time::MidNight) 
+                                      || (args.startTime == Time::MidNight && args.endTime == Time::Zero) )
+        throw std::invalid_argument("It works 24/7");
+
     args.pricePerHour = static_cast<uint8_t>(std::stoi(lines[2]));
 }
 

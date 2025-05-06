@@ -3,7 +3,6 @@ import sys
 from pathlib import Path
 
 def trim_empty(lines):
-    """Удаляет пустые строки в начале и конце списка строк."""
     start = 0
     while start < len(lines) and lines[start].strip() == '':
         start += 1
@@ -26,11 +25,9 @@ def main():
         output = process.stdout
         expected = result_file.read_text()
 
-        # Разделяем вывод и ожидание на строки
         output_lines = [line.rstrip() for line in output.splitlines()]
         expected_lines = [line.rstrip() for line in expected.splitlines()]
 
-        # Удаляем пустые строки в начале и конце
         output_trimmed = trim_empty(output_lines)
         expected_trimmed = trim_empty(expected_lines)
 
@@ -41,7 +38,6 @@ def main():
             print(f"{test} is failed")
             failed += 1
 
-            # Поиск первого несовпадения
             max_lines = max(len(output_trimmed), len(expected_trimmed))
             for i in range(max_lines):
                 line_out = output_trimmed[i] if i < len(output_trimmed) else None
