@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstdint>
 #include <iomanip>
+#include <iostream>
 #include <string>
 
 
@@ -30,7 +31,7 @@ struct Time
             int h = std::stoi(hour_str);
             int m = std::stoi(min_str);
 
-            if (h < 0 ||  m < 0)
+            if (h < 0 ||  m < 0 || h > 24 || m > 60)
                 throw std::out_of_range("Time value out of range");
 
             hours = static_cast<uint8_t>(h);
@@ -91,9 +92,10 @@ struct Time
         return {static_cast<uint16_t>(diff)};
     }
 
-    Time& operator+=(const Time& var)
+    Time& operator+=(const Time& other)
     {
-        *this += var.toMinutes();
+        hours += other.hours;
+        minutes += other.minutes;
         return *this;
     }
 

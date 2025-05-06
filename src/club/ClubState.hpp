@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <utility>
 #include <list>
+#include <cmath>
+#include <set>
 
 #include "Time.hpp"
 #include "enums/EventType.hpp"
@@ -16,7 +18,7 @@ struct Session
     Time startTime = Time(0, 0);
     std::string client;
 
-    Session(std::string client) : client(std::move(client)) {}
+    Session(std::string client, Time start) : startTime(start), client(std::move(client)) {}
 };
 
 struct Table
@@ -28,11 +30,13 @@ struct Table
     bool isOccupied() const {return currentSession.has_value();}
     void ImReadyToPay(const Time& endTime, uint64_t price)
     {
-        auto var = endTime - currentSession.value().startTime;
+        auto duration = endTime - currentSession.value().startTime;
+        auto durationHours = duration.toHours();
+        
         profit += isOccupied() ?
-            (var.hours + 59) * price : 0;
-
-        occupiedDuration += var;
+            static_cast<uint64_t>(std::ceil(durationHours)) * price : 0;
+        
+        occupiedDuration += duration;
     }
 };
 
@@ -62,73 +66,15 @@ public:
         };
     }
 
-    void addToQueue(const std::string& client)
-    {
-        if (clientToIterator.contains(client)) 
-            throw std::runtime_error("Duplicate in queue");
-        waitingList.push_back(client);
-        clientToIterator[client] = std::prev(waitingList.end());
-    }
-
-    std::optional<std::string> popFromQueue()
-    {
-        if (waitingList.empty()) return std::nullopt;
-        auto client = waitingList.front();
-        waitingList.pop_front();
-        clientToIterator.erase(client);
-        return client;
-    }
-
-    void removeFromQueue(const std::string& client)
-    {
-        auto it = clientToIterator.find(client);
-        if (it == clientToIterator.end())
-            throw std::runtime_error("Client not in queue");
-        waitingList.erase(it->second);
-        clientToIterator.erase(it);
-    }
+    void addToQueue(const std::string& client);
+    std::optional<std::string> popFromQueue();
+    void removeFromQueue(const std::string& client);
+    bool isQueueFull() const;
     
-    void sitForTable(uint64_t tableId, const std::string& client)
-    {
-        if (tableId >= tables.size()) throw std::out_of_range("Invalid table ID");
-        if (tables[tableId].isOccupied()) throw std::runtime_error("PlaceIsBusy");
-        if (clientToTable.contains(client)) throw std::runtime_error("ClientAlreadyInside");
-        
-        tables[tableId].currentSession = Session{client};
-        clientToTable[client] = tableId;
-    }
-    
-    void releaseTable(uint64_t tableId, const Time& time)
-    {
-        if (!tables[tableId].isOccupied()) return;
-        
-        tables[tableId].ImReadyToPay(time, pricePerHour);
-
-        clientToTable.erase(tables[tableId].currentSession->client);
-        tables[tableId].currentSession.reset();
-
-        if (!waitingList.empty())
-        {
-            auto client = popFromQueue().value();
-            sitForTable(tableId, client);
-
-            // ID 12
-            std::cout << time << ' ' << toId(Events::EventType::ClientSatFromQueue)
-                      << ' ' << client << ' ' << tableId << '\n';
-        }
-    }
-    
-    void moveUser(uint64_t from, uint64_t to, const Time& time)
-    {
-        tables[from].ImReadyToPay(time, pricePerHour);
-        tables[to].currentSession = std::move(tables[from].currentSession);
-        tables[to].currentSession->startTime = Time::Zero;
-    }
-
-    bool isQueueFull() const
-    {
-        return clientToTable.size() > tables.size() - 1;
-    }
+    void sitForTable(uint64_t tableId, const std::string& client, const Time& time);
+    void releaseTable(uint64_t tableId, const Time& time);
+    void sitSomebodyFromQueue(uint64_t tableId, const Time& time);
+    void moveUser(uint64_t from, uint64_t to, const Time& time);
     
     bool isEverythingOccupied() const
     {
@@ -147,27 +93,30 @@ public:
     
     bool isOpen(const Time& time) const {return isOpenChecker(time);}
 
-    // std::optional<uint64_t> getClientTable(const std::string& client) const
-    // {
-    //     auto it = clientToTable.find(client);
-    //     return it != clientToTable.end() ? std::make_optional(it->second) : std::nullopt;
-    // }
-
-    void generateEndOfDayReport()
+    std::optional<uint64_t> getClientTable(const std::string& client) const
     {
-        // std::vector<std::string> remainingClients(clientsInQueue.begin(), clientsInQueue.end());
-        
+        auto it = clientToTable.find(client);
+        return it != clientToTable.end() ? std::make_optional(it->second) : std::nullopt;
     }
 
-    uint64_t getTableIdByClient(const std::string& string)
+    void kickOutClients();
+
+    std::string getEndOfDayReport();
+
+    uint64_t getTableIdByClient(const std::string& clientName) const
     {
-        return clientToTable[string];
+        return clientToTable.at(clientName);
+    }
+
+    bool isClientAtTable(const std::string& clientName)
+    {
+        return clientToTable.contains(clientName);
     }
 
 private:
-    bool isInQueue(const std::string& client) const
+    bool isInQueue(const std::string& clientName) const
     {
-        return clientToIterator.contains(client);
+        return clientToIterator.contains(clientName);
     }
 };
 

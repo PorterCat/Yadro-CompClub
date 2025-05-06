@@ -1,1 +1,27 @@
-0
+09:00
+08:48 1 client1
+08:48 13 NotOpenYet
+09:41 1 client1
+09:41 3 client1
+09:41 13 ICanWaitNoLonger!
+09:48 1 client2
+09:48 3 client2
+09:48 13 ICanWaitNoLonger!
+09:50 1 client5
+09:50 3 client5
+09:50 13 ICanWaitNoLonger!
+09:55 1 client6
+09:55 3 client6
+09:55 13 ICanWaitNoLonger!
+09:55 11 client6
+10:00 1 client7
+10:00 3 client7
+10:00 13 ICanWaitNoLonger!
+10:00 11 client7
+19:00 11 client1
+19:00 11 client2
+19:00 11 client5
+19:00
+1 0 00:00
+2 0 00:00
+3 0 00:00

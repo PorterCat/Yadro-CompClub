@@ -1,52 +1,41 @@
 #include <iostream>
 
-#include "ArgsParser.hpp"
-#include "EventError.hpp"
+#include "DayParser.hpp"
+#include "ClientArrivedHandler.hpp"
+#include "ClientLeftHandler.hpp"
+#include "ClientWaitingHandler.hpp"
+#include "EventHandlerFactory.hpp"
 #include "Time.hpp"
 #include "club/ClubState.hpp"
-#include "event_handlers/EventHandlerFactory.hpp"
 
 int main(int argc, char* argv[])
+try
 {
     if(argc != 2)
     {
         std::cout << "Usage:" << argv[0] << " <input_file>\n";
         throw std::invalid_argument("Wrong number of arguments");
     }
-
-    try
-    {
-        auto args = ArgsParser::parse(argv[1]);
-
-        std::cout << args.startTime << '\n';
         
-        EventHandlerFactory factory;
-        ClubState club = {args.startTime, args.endTime, args.pricePerHour, args.tableCount};
+    auto args = DayParser::parse(argv[1]);
 
-        for(const auto& event : args.events)
-        {
-            try
-            {
-                auto& handler = factory.getHandler(event.id);
-                handler.handle(event.time, event.clientName, event.tableNumber, club);
-            }
-            catch (const EventError& error)
-            {
-                std::cout << event.time << ' ' << toId(Events::EventType::ErrorOccurred)
-                                        << ' ' << error.what() << '\n';
-            }
-            catch (const std::exception& error)
-            {
-                std::cout << ' ' << error.what() << '\n';
-            }
-        }
-
-        std::cout << args.endTime << '\n';
-    }
-    catch(const std::exception& e)
+    std::cout << args.startTime << '\n';
+    
+    ClubState club {args.startTime, args.endTime, args.tableCount, args.pricePerHour};
+    
+    for(const auto& event : args.events)
     {
-        std::cout << e.what() << "\n";
-        return 1;
+        std::cout << event << '\n';
+        EventHandlerFactory::getHandler(event.id).handle(event, club);
     }
+
+    club.kickOutClients();
+    std::cout << args.endTime << '\n';
+    std::cout << club.getEndOfDayReport();
     return 0;
+}
+catch(const std::exception& e)
+{
+    std::cerr << e.what() << "\n";
+    return 1;
 }

@@ -1,5 +1,7 @@
 #ifndef EVENTTYPE_HPP
 #define EVENTTYPE_HPP
+#include <iostream>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -7,66 +9,58 @@
 
 namespace Events
 {
+enum class EventType;
+
 using EventId = int;
+    
+struct InEvent
+{
+    Time time = Time(0, 0);
+    EventId id = 0;
+    std::string clientName = std::string();
+    std::optional<uint64_t> tableNumber = std::nullopt;
+};
     
 enum class EventType
 {
-    ClientArrived,       // ID 1
-    ClientSat,           // ID 2
-    ClientWaiting,       // ID 3
-    ClientLeft,          // ID 4
+    ClientArrived       = 1,
+    ClientSat           = 2,
+    ClientWaiting       = 3,
+    ClientLeft          = 4,
 
-    OutputClientLeft,    // ID 11
-    ClientSatFromQueue,  // ID 12
-    ErrorOccurred,       // ID 13
+    OutputClientLeft    = 11,
+    ClientSatFromQueue  = 12,
+    ErrorOccurred       = 13,
 
-    Unknown
+    Unknown             = 0,
     
 };
 
-inline EventType toType(EventId id)
+inline void printError(const InEvent& event, const std::string& errorMsg)
 {
-    static const std::unordered_map<EventId, EventType> idToType = {
-        {1,  EventType::ClientArrived},
-        {2,  EventType::ClientSat},
-        {3,  EventType::ClientWaiting},
-        {4,  EventType::ClientLeft},
-        {11, EventType::OutputClientLeft},
-        {12, EventType::ClientSatFromQueue},
-        {13, EventType::ErrorOccurred}
-    };
-    auto it = idToType.find(id);
-    return (it != idToType.end()) ? it->second : EventType::Unknown;
+    std::cout << event.time << ' ' << static_cast<EventId>(EventType::ErrorOccurred)
+              << ' ' << errorMsg << '\n';
 }
 
-inline EventId toId(EventType type)
+inline void PrintOutEvent(const InEvent& event, EventType eventType)
 {
-    static const std::unordered_map<EventType, EventId> typeToId = {
-        {EventType::ClientArrived,      1},
-        {EventType::ClientSat,          2},
-        {EventType::ClientWaiting,      3},
-        {EventType::ClientLeft,         4},
-        {EventType::OutputClientLeft,   11},
-        {EventType::ClientSatFromQueue,12},
-        {EventType::ErrorOccurred,     13}
-    };
-    return typeToId.at(type);
+    std::cout << event.time << ' ' << static_cast<EventId>(eventType)
+              << ' ' << event.clientName;
+
+    if(event.tableNumber.has_value())
+        std::cout << ' ' << event.tableNumber.value();
+
+    std::cout << '\n';
+}
 }
 
-inline std::string getName(EventType type)
+inline std::ostream& operator<<(std::ostream& stream, const Events::InEvent& inEvent)
 {
-    static const std::unordered_map<EventType, std::string> names = {
-        {EventType::ClientArrived,      "ClientArrived"},
-        {EventType::ClientSat,          "ClientSat"},
-        {EventType::ClientWaiting,      "ClientWaiting"},
-        {EventType::ClientLeft,         "ClientLeft"},
-        {EventType::OutputClientLeft,    "ClientForcedOut"},
-        {EventType::ClientSatFromQueue, "ClientSatFromQueue"},
-        {EventType::ErrorOccurred,      "ErrorOccurred"},
-        {EventType::Unknown,            "Unknown"}
-    };
-    return names.at(type);
-}
+    stream << inEvent.time << ' ' << inEvent.id << ' ' << inEvent.clientName;
+    if(inEvent.tableNumber.has_value())
+        stream << ' ' << inEvent.tableNumber.value();
+
+    return stream;
 }
 
 #endif // EVENTTYPE_HPP
